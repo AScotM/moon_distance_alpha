@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moon Distance Calculator</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #fff;
+    }
+    .container {
+        max-width: 400px;
+        margin: 80px auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        background-color: #212121;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    .container:hover {
+        transform: scale(1.05);
+    }
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .form-group label {
+        display: inline-block;
+        width: 80px;
+        font-weight: bold;
+    }
+    .form-group input {
+        width: calc(100% - 90px);
+        padding: 10px;
+        border: 1px solid #666;
+        border-radius: 5px;
+        color: #fff;
+        background-color: #333;
+        transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+        border-color: #007bff;
+    }
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        font-size: 16px;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+    .result-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        background-color: #007bff;
+        color: #fff;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 1s;
+    }
+    .result-popup.show {
+        opacity: 1;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="margin-bottom: 20px; color: #007bff;">Moon Distance Calculator</h2>
+    <div class="form-group">
+        <label for="latitude">Latitude:</label>
+        <input type="text" id="latitude" placeholder="Enter latitude">
+    </div>
+    <div class="form-group">
+        <label for="longitude">Longitude:</label>
+        <input type="text" id="longitude" placeholder="Enter longitude">
+    </div>
+    <button class="btn" onclick="calculateDistance()">Calculate</button>
+</div>
+
+<div id="resultPopup" class="result-popup">
+    <h2 style="margin-bottom: 20px;">Result</h2>
+    <p id="resultText"></p>
+</div>
+
+<script>
+function moonDistance(lat1, lon1, lat2, lon2) {
+    const degreesToRadians = (degrees) => {
+        return degrees * (Math.PI / 180);
+    };
+
+    lat1 = degreesToRadians(lat1);
+    lon1 = degreesToRadians(lon1);
+    lat2 = degreesToRadians(lat2);
+    lon2 = degreesToRadians(lon2);
+
+    const dlon = lon2 - lon1;
+    const dlat = lat2 - lat1;
+
+    const a = Math.sin(dlat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = 6371 * c;
+    return distance;
+}
+
+function getTimezoneTime(timezone) {
+    const utcTime = new Date().toISOString().split('.')[0] + 'Z';
+    const tzTime = new Date(new Date(utcTime).toLocaleString("en-US", {timeZone: timezone}));
+    return tzTime;
+}
+
+function getMoonDistance(lat, lon) {
+    const timezone = 'Asia/Kolkata';
+    const tzTime = getTimezoneTime(timezone);
+
+    const lat1 = parseFloat(lat);
+    const lon1 = parseFloat(lon);
+    const lat2 = 0;
+    const lon2 = 0;
+
+    const distance = moonDistance(lat1, lon1, lat2, lon2);
+    return distance;
+}
+
+function calculateDistance() {
+    const latitude = document.getElementById('latitude').value.trim();
+    const longitude = document.getElementById('longitude').value.trim();
+
+    if (latitude === '' || longitude === '') {
+        alert('Please enter valid latitude and longitude values.');
+        return;
+    }
+
+    const distance = getMoonDistance(latitude, longitude);
+    showResult(distance);
+}
+
+function showResult(distance) {
+    const resultText = document.getElementById('resultText');
+    resultText.textContent = `The moon distance is ${distance.toFixed(2)} kilometers.`;
+
+    const resultPopup = document.getElementById('resultPopup');
+    resultPopup.style.opacity = 1;
+
+    setTimeout(() => {
+        resultPopup.style.opacity = 0;
+    }, 3000);
+}
+</script>
+
+</body>
+</html>
+
